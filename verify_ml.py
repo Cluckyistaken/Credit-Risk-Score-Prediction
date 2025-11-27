@@ -1,0 +1,44 @@
+import os
+import sys
+import django
+import pandas as pd
+
+# Setup Django environment
+sys.path.append(os.path.join(os.getcwd(), 'backend'))
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+django.setup()
+
+from apps.ml.services import MLService
+
+def test_prediction():
+    print("Testing MLService prediction...")
+    
+    # Sample data (based on german_credit_data.csv structure)
+    sample_data = {
+        'Age': 30,
+        'Sex': 'male',
+        'Job': 2,
+        'Housing': 'own',
+        'Saving_accounts': 'little',
+        'Checking_account': 'rich',
+        'Credit_amount': 1000,
+        'Duration': 12,
+        'Purpose': 'radio/TV'
+    }
+    
+    try:
+        result = MLService.predict(sample_data)
+        print(f"Prediction Result: {result}")
+        
+        if "prediction" in result and "probability" in result:
+            print("SUCCESS: Prediction returned expected keys.")
+        else:
+            print("FAILURE: Prediction missing keys.")
+            
+    except Exception as e:
+        print(f"FAILURE: Error during prediction: {e}")
+        import traceback
+        traceback.print_exc()
+
+if __name__ == "__main__":
+    test_prediction()

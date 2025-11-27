@@ -1,0 +1,18 @@
+# Node.js backend (Express) - production Dockerfile
+FROM node:18-alpine AS builder
+WORKDIR /app
+COPY backend/package*.json ./
+RUN npm ci --only=production
+COPY backend/ .
+# If you build assets or transpile, do it here:
+# RUN npm run build
+
+FROM node:18-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app /app
+# Create non-root user
+RUN addgroup -S app && adduser -S app -G app
+USER app
+EXPOSE 4000
+CMD ["node", "server.js"]

@@ -1,0 +1,11 @@
+[
+  "age",
+  "income",
+  "loan_amount",
+  "employment_status__employed",
+  "employment_status__retired",
+  "employment_status__self-employed",
+  "employment_status__student",
+  "credit_history__bad",
+  "credit_history__good"
+]

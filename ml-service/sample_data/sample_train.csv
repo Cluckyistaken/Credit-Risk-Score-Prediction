@@ -1,0 +1,11 @@
+age,income,loan_amount,employment_status,credit_history,target
+25,30000,5000,employed,good,0
+40,80000,20000,self-employed,good,0
+34,45000,10000,employed,bad,1
+55,120000,35000,retired,good,0
+23,18000,3000,student,bad,1
+45,60000,15000,employed,good,0
+29,38000,7000,employed,bad,1
+38,52000,12000,self-employed,good,0
+50,90000,25000,employed,good,0
+31,40000,8000,employed,bad,1

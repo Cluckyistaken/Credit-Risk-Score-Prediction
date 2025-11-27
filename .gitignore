@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+.venv/
+temp_venv/
+
+# Models / binaries
+*.dll
+*.pkl
+
+# Node
+node_modules/
+node_modules/ 
+.env 
