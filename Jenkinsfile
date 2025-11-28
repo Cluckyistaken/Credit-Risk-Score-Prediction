@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOCKER_HUB_USER = 'cluckyistaken'
         IMAGE_TAG = "${BUILD_NUMBER}"
+        KUBECONFIG = "C:\\Users\\dolit\\.kube\\config"
     }
 
     stages {
