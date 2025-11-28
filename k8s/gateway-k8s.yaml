@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: cluckyistaken/credit-risk-nginx:v1
+          image: cluckyistaken/credit-risk-nginx:%IMAGE_TAG%
           ports:
             - containerPort: 80
             - containerPort: 443

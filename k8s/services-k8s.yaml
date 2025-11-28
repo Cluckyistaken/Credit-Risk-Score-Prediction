@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: cluckyistaken/credit-risk-backend:v1
+          image: cluckyistaken/credit-risk-backend:%IMAGE_TAG%
           ports:
             - containerPort: 8000
           env:
@@ -59,7 +59,7 @@ spec:
     spec:
       containers:
         - name: ml-service
-          image: cluckyistaken/credit-risk-ml:v1
+          image: cluckyistaken/credit-risk-ml:%IMAGE_TAG%
           ports:
             - containerPort: 5001
           env:
@@ -94,7 +94,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: cluckyistaken/credit-risk-frontend:v1
+          image: cluckyistaken/credit-risk-frontend:%IMAGE_TAG%
           ports:
             - containerPort: 3000
           env:

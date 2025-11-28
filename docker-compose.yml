@@ -59,8 +59,12 @@ services:
 
   nginx:
     build: ./infra/nginx
+    volumes:
+      - ./infra/nginx/certs/fullchain.pem:/etc/ssl/certs/fullchain.pem:ro
+      - ./infra/nginx/certs/privkey.pem:/etc/ssl/private/privkey.pem:ro
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - frontend
       - backend
