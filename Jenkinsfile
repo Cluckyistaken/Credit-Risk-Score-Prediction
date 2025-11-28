@@ -1,9 +1,10 @@
 pipeline {
     agent any
 
-    tools {
-        // Make sure to configure a NodeJS installation named 'node-18' in Jenkins Global Tool Configuration
-        nodejs 'node-18' 
+    environment {
+        DOCKER_HUB_CREDENTIALS = 'docker-hub-credentials'
+        DOCKER_HUB_USER = 'cluckyistaken'
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
@@ -13,64 +14,57 @@ pipeline {
             }
         }
 
-        stage('Backend Test') {
+        stage('Backend Tests') {
             steps {
                 dir('backend') {
-                    script {
-                        // Check if running on Windows or Unix/Linux to use appropriate command
-                        if (isUnix()) {
-                            sh 'python3 -m venv venv'
-                            sh '. venv/bin/activate && pip install -r requirements.txt'
-                            sh '. venv/bin/activate && python manage.py test'
-                        } else {
-                            bat 'python -m venv venv'
-                            bat 'call venv\\Scripts\\activate.bat && pip install -r requirements.txt'
-                            bat 'call venv\\Scripts\\activate.bat && python manage.py test'
-                        }
-                    }
+                    // Install dependencies and run tests
+                    // Using PowerShell as the environment is Windows
+                    powershell 'pip install -r requirements.txt'
+                    powershell 'python manage.py test'
                 }
             }
         }
 
-        stage('Frontend Build') {
-            steps {
-                dir('frontend') {
-                    script {
-                        if (isUnix()) {
-                            sh 'npm install'
-                            sh 'npm run build'
-                        } else {
-                            bat 'npm install'
-                            bat 'npm run build'
-                        }
-                    }
-                }
-            }
-        }
-
-        stage('Selenium Test') {
+        stage('Build & Push') {
             steps {
                 script {
-                    // This stage assumes backend and frontend are running.
-                    // In a real CI env, you'd start them here using background processes.
-                    // For this simple setup, we'll just run the script assuming the env is ready 
-                    // or use a simple check.
-                    
-                    dir('backend') {
-                         if (isUnix()) {
-                            sh '. venv/bin/activate && pip install selenium webdriver-manager'
-                         } else {
-                            bat 'call venv\\Scripts\\activate.bat && pip install selenium webdriver-manager'
-                         }
+                    docker.withRegistry('', "${DOCKER_HUB_CREDENTIALS}") {
+                        // Build and Push Backend
+                        def backendImage = docker.build("${DOCKER_HUB_USER}/credit-risk-backend:${IMAGE_TAG}", "./backend")
+                        backendImage.push()
+
+                        // Build and Push Frontend
+                        def frontendImage = docker.build("${DOCKER_HUB_USER}/credit-risk-frontend:${IMAGE_TAG}", "./frontend")
+                        frontendImage.push()
+
+                        // Build and Push ML Service
+                        def mlImage = docker.build("${DOCKER_HUB_USER}/credit-risk-ml:${IMAGE_TAG}", "./ml-service")
+                        mlImage.push()
+
+                        // Build and Push Nginx
+                        def nginxImage = docker.build("${DOCKER_HUB_USER}/credit-risk-nginx:${IMAGE_TAG}", "./infra/nginx")
+                        nginxImage.push()
                     }
-                    
-                    // Run the test script (at root)
-                    // We use the backend venv to run the python script
-                    if (isUnix()) {
-                        sh 'backend/venv/bin/python selenium_test.py'
-                    } else {
-                        bat 'backend\\venv\\Scripts\\python.exe selenium_test.py'
-                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    // Replace %IMAGE_TAG% placeholder with actual build number
+                    powershell """
+                        (Get-Content k8s/services-k8s.yaml) -replace '%IMAGE_TAG%', '${IMAGE_TAG}' | Set-Content k8s/services-k8s.yaml
+                        (Get-Content k8s/gateway-k8s.yaml) -replace '%IMAGE_TAG%', '${IMAGE_TAG}' | Set-Content k8s/gateway-k8s.yaml
+                    """
+
+                    // Apply Kubernetes manifests
+                    powershell 'kubectl apply -f k8s/infra-k8s.yaml'
+                    powershell 'kubectl apply -f k8s/services-k8s.yaml'
+                    powershell 'kubectl apply -f k8s/gateway-k8s.yaml'
+
+                    // Restart deployments to pick up new images
+                    powershell 'kubectl rollout restart deployment backend frontend ml-service nginx'
                 }
             }
         }
