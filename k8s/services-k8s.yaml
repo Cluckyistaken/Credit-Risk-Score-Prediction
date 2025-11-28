@@ -15,7 +15,6 @@ spec:
       containers:
         - name: backend
           image: cluckyistaken/credit-risk-backend:%IMAGE_TAG%
-          command: ["/bin/sh", "-c", "sleep 3600"]
           ports:
             - containerPort: 8000
           env:
@@ -97,7 +96,7 @@ spec:
         - name: frontend
           image: cluckyistaken/credit-risk-frontend:%IMAGE_TAG%
           ports:
-            - containerPort: 3000
+            - containerPort: 80
           env:
             - name: VITE_API_BASE
               value: "http://backend:8000"
@@ -112,4 +111,4 @@ spec:
   ports:
     - protocol: TCP
       port: 3000
-      targetPort: 3000
+      targetPort: 80
