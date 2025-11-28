@@ -8,11 +8,11 @@ import time
 import sys
 
 def run_test():
-    print("Starting Selenium Test...")
+    print("Starting Selenium End-to-End Test...")
     
     # Setup Chrome options
     options = webdriver.ChromeOptions()
-    # options.add_argument('--headless') # Uncomment to run headless
+    # options.add_argument('--headless') # Keep commented to see the browser
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
 
@@ -26,39 +26,40 @@ def run_test():
         print(f"Navigating to {url}...")
         driver.get(url)
         
-        # Wait for form to load (checking for an input field)
+        # 2. Wait for form to load
         wait = WebDriverWait(driver, 10)
-        print("Waiting for page to load...")
+        print("Waiting for form inputs...")
+        wait.until(EC.presence_of_element_located((By.NAME, "name")))
         
-        # Adjust these selectors based on your actual React App structure
-        # Assuming inputs have name attributes or specific IDs
-        # If not, we might need to inspect the frontend code first.
-        # For now, I'll use generic selectors that often work or need adjustment.
+        # 3. Fill Form
+        print("Filling application form...")
+        driver.find_element(By.NAME, "name").send_keys("John Doe")
+        driver.find_element(By.NAME, "age").send_keys("35")
+        driver.find_element(By.NAME, "amount").send_keys("5000")
+        driver.find_element(By.NAME, "duration").send_keys("12")
+        driver.find_element(By.NAME, "purpose").send_keys("car")
         
-        # Example: Filling 'Age'
-        # Try to find by name="Age" or similar
-        # If your frontend uses specific IDs, replace these.
+        # 4. Submit
+        print("Submitting form...")
+        submit_btn = driver.find_element(By.TAG_NAME, "button")
+        submit_btn.click()
         
-        # Let's try to find inputs. 
-        # Since I haven't seen the frontend code, I will assume standard inputs.
-        # If this fails, I will need to read the frontend code.
+        # 5. Wait for Result
+        print("Waiting for result...")
+        # Wait for text containing "Result:" or "Error:"
+        result_element = wait.until(EC.presence_of_element_located((By.XPATH, "//*[contains(text(), 'Result:') or contains(text(), 'Error:')]")))
         
-        # For the purpose of this script, I'll try to find *any* input to verify page load at least.
-        wait.until(EC.presence_of_element_located((By.TAG_NAME, "input")))
-        print("Page loaded successfully.")
+        result_text = result_element.text
+        print(f"Test Completed. Message: {result_text}")
         
-        # TODO: Implement actual form filling once frontend structure is confirmed.
-        # For now, we just verify the page loads without error.
-        
-        title = driver.title
-        print(f"Page Title: {title}")
-        
-        # Check if "Credit Risk" or similar is in title or body
-        body_text = driver.find_element(By.TAG_NAME, "body").text
-        if "Credit" in body_text or "Risk" in body_text:
-             print("SUCCESS: Found expected text on page.")
+        if "Result:" in result_text:
+            print("SUCCESS: Prediction received.")
         else:
-             print("WARNING: Did not find 'Credit' or 'Risk' text. Page might be blank or different.")
+            print("FAILURE: Received error from backend.")
+            
+        # 6. Visibility Delay
+        print("Keeping browser open for 5 seconds...")
+        time.sleep(5)
 
     except Exception as e:
         print(f"FAILURE: Test failed with error: {e}")
