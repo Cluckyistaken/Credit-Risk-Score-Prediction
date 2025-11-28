@@ -14,3 +14,4 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . .
 
 RUN dos2unix run-prod.sh && chmod +x run-prod.sh
+CMD ["./run-prod.sh"]
