@@ -15,6 +15,7 @@ spec:
       containers:
         - name: backend
           image: cluckyistaken/credit-risk-backend:%IMAGE_TAG%
+          command: ["/bin/sh", "-c", "sleep 3600"]
           ports:
             - containerPort: 8000
           env:
