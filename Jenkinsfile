@@ -47,6 +47,10 @@ pipeline {
                         // Build and Push Nginx
                         bat "docker build -t ${DOCKER_HUB_USER}/credit-risk-nginx:${IMAGE_TAG} ./infra/nginx"
                         bat "docker push ${DOCKER_HUB_USER}/credit-risk-nginx:${IMAGE_TAG}"
+
+                        // Build and Push Database
+                        bat "docker build -t ${DOCKER_HUB_USER}/credit-risk-database:${IMAGE_TAG} ./database"
+                        bat "docker push ${DOCKER_HUB_USER}/credit-risk-database:${IMAGE_TAG}"
                         
                         // Logout for security
                         bat 'docker logout'
@@ -62,6 +66,7 @@ pipeline {
                     powershell """
                         (Get-Content k8s/services-k8s.yaml) -replace '%IMAGE_TAG%', '${IMAGE_TAG}' | Set-Content k8s/services-k8s.yaml
                         (Get-Content k8s/gateway-k8s.yaml) -replace '%IMAGE_TAG%', '${IMAGE_TAG}' | Set-Content k8s/gateway-k8s.yaml
+                        (Get-Content k8s/infra-k8s.yaml) -replace '%IMAGE_TAG%', '${IMAGE_TAG}' | Set-Content k8s/infra-k8s.yaml
                     """
 
                     // Apply Kubernetes manifests
